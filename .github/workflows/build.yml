@@ -51,15 +51,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Check if failure-message.md exists
-        run: |
-          ls -l ./
-          ls -l .github/
-          ls -l .github/workflows/
-          ls -l .github/workflows/failure-message.md
+
       - name: Create issue on failure
         uses: peter-evans/create-issue-from-file@v4
         with:
           title: "🚨 Build failed for n8n image"
           content-filepath: .github/workflows/failure-message.md
+          token: ${{ secrets.GITHUB_TOKEN }}
           labels: build-failure
