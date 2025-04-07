@@ -37,7 +37,7 @@ jobs:
           context: .
           push: true
           tags: |
-            gghcr.io/${{ env.LOWERCASE_REPO_NAME }}:latest
+            ghcr.io/${{ env.LOWERCASE_REPO_NAME }}:latest
             ghcr.io/${{ env.LOWERCASE_REPO_NAME }}:${{ steps.version.outputs.version }}
 
   notify-on-failure:
@@ -46,6 +46,12 @@ jobs:
     if: failure()
 
     steps:
+      - name: Check if failure-message.md exists
+        run: |
+          ls -l ./
+          ls -l .github/
+          ls -l .github/workflows/
+          ls -l .github/workflows/failure-message.md
       - name: Create issue on failure
         uses: peter-evans/create-issue-from-file@v4
         with:
