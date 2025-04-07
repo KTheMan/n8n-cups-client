@@ -46,6 +46,8 @@ jobs:
     if: failure()
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: Check if failure-message.md exists
         run: |
           ls -l ./
@@ -56,5 +58,5 @@ jobs:
         uses: peter-evans/create-issue-from-file@v4
         with:
           title: "🚨 Build failed for n8n image"
-          content-filepath: ${{ github.workspace }}/.github/workflows/failure-message.md
+          content-filepath: .github/workflows/failure-message.md
           labels: build-failure
