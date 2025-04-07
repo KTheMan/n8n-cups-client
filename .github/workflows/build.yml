@@ -57,5 +57,5 @@ jobs:
         with:
           title: "🚨 Build failed for n8n image"
           content-filepath: .github/workflows/failure-message.md
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ISSUE_NOTIFY_TOKEN }}
           labels: build-failure
