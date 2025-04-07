@@ -50,5 +50,5 @@ jobs:
         uses: peter-evans/create-issue-from-file@v4
         with:
           title: "🚨 Build failed for n8n image"
-          content-filepath: .github/workflows/failure-message.md
+          content-filepath: ${{ github.workspace }}/.github/workflows/failure-message.md
           labels: build-failure
