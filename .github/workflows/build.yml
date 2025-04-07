@@ -1,0 +1,48 @@
+name: Build and Push Custom n8n Image
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Midnight +0
+  workflow_dispatch:     
+  push:
+    branches:
+      - main  # Trigger on pushes to the 'main' branch
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Run version check
+        id: version
+        run: |
+          bash version-check.sh
+          echo "version=$(cat version.txt)" >> $GITHUB_OUTPUT
+
+      - name: Build and push custom n8n image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
+
+  notify-on-failure:
+    runs-on: ubuntu-latest
+    needs: check-and-build
+    if: failure()
+
+    steps:
+      - name: Create issue on failure
+        uses: peter-evans/create-issue-from-file@v4
+        with:
+          title: "🚨 Build failed for n8n image"
+          content-filepath: .github/workflows/failure-message.md
+          labels: build-failure
