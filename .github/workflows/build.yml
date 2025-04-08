@@ -52,6 +52,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Generate failure message
+        run: |
+          echo "## 🚨 Build failed for custom n8n Docker image" > .github/workflows/failure-message.md
+          echo "Repository: ${{ github.repository }}" >> .github/workflows/failure-message.md
+          echo "Branch: ${{ github.ref_name }}" >> .github/workflows/failure-message.md
+          echo "Workflow: ${{ github.workflow }}" >> .github/workflows/failure-message.md
+          echo "Run ID: ${{ github.run_id }}" >> .github/workflows/failure-message.md
+          echo "" >> .github/workflows/failure-message.md
+          echo "🔗 [View logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> .github/workflows/failure-message.md
+          echo "" >> .github/workflows/failure-message.md
+          echo "Please investigate and re-run the workflow if needed." >> .github/workflows/failure-message.md
+
       - name: Create issue on failure
         uses: peter-evans/create-issue-from-file@v4
         with:
