@@ -3,24 +3,22 @@ name: Build and Push Custom n8n Image
 on:
   schedule:
     - cron: '0 0 * * *'  # Midnight +0
-  workflow_dispatch:     
-  push:
-    branches:
-      - main  # Trigger on pushes to the 'main' branch
+  workflow_dispatch:
 
 jobs:
   check-and-build:
     runs-on: ubuntu-latest
-    env:
-      LOWERCASE_REPO_NAME:
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set lowercase repo name
-        id: lowercase-repo
-        run: echo "LOWERCASE_REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      - name: Sanitize repo slug
+        uses: actions/github-script@v6
+        id: repo_slug
+        with:
+          result-encoding: string
+          script: return 'ghcr.io/${{ github.repository }}'.toLowerCase()
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -30,6 +28,12 @@ jobs:
         run: |
           bash version-check.sh
           echo "version=$(cat version.txt)" >> $GITHUB_OUTPUT
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push custom n8n image
         uses: docker/build-push-action@v5
@@ -37,8 +41,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ env.LOWERCASE_REPO_NAME }}:latest
-            ghcr.io/${{ env.LOWERCASE_REPO_NAME }}:${{ steps.version.outputs.version }}
+            ${{ steps.repo_slug.outputs.result }}:latest
+            ${{ steps.repo_slug.outputs.result }}:${{ steps.version.outputs.version }}
 
   notify-on-failure:
     runs-on: ubuntu-latest
